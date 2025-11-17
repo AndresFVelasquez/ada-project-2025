@@ -4,3 +4,15 @@ __pycache__/
 .env
 .vscode/
 .DS_Store
+.venv/
+venv/
+ENV/
+env.bak/
+venv.bak/
+*.code-workspace
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+.AppleDouble
+.LSOverride
