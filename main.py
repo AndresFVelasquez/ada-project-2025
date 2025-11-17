@@ -1,12 +1,10 @@
-from core import *
-from data import *
-from ui.menu import Menu
-
+from core.ui.menu import Menu
 
 
 def main():
     menu = Menu()
     while True:
+        print("Hola mundo")
         menu.show_main_menu()
 
 
