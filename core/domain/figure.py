@@ -1,16 +1,16 @@
 from abc import ABC, abstractmethod
+from core.domain.figure_type import FigureType
 
 class Figure(ABC):
     """
     Abstract base class for geometric figures.
     """
-
-    def __init__(self, points: list, name: str = "Figure"):
-        self._name = name
-        self._points = points
-        self._area = 0.0
-        self._number_sides = len(points)
-
+    def __init__(self, name: str, vertices: list, num_sides: int, figure_type: FigureType):
+        self.name = name
+        self.vertices = vertices # List[Point]
+        self.area = 0.0
+        self.num_sides = num_sides
+        self.type = figure_type
 
     @property
     def name(self):
