@@ -5,27 +5,17 @@ class Figure(ABC):
     """
     Abstract base class for geometric figures.
     """
-    def __init__(self, name: str, vertices: list, num_sides: int, figure_type: FigureType):
+    def __init__(self, name: str, vertices: list, figure_type: FigureType):
         self.name = name
-        self.vertices = vertices # List[Point]
-        self.area = 0.0
-        self.num_sides = num_sides
+        self.vertices = vertices
         self.type = figure_type
-
-    @property
-    def name(self):
-        return self._name
+        self.num_sides = len(vertices)
+        self.area = 0.0
 
     @abstractmethod
     def calculate_area(self) -> float:
-        """Abstract method to calculate figure area."""
-        raise NotImplementedError("Abstract method")
+        """Calculate and return the area of the figure."""
+        pass
 
-    @abstractmethod
-    def is_valid(self) -> bool:
-        """Abstract method to validate if figure is valid."""
-        raise NotImplementedError("Abstract method")
-
-    
     def __repr__(self):
-        return f"{self._name} with {len(self._points)} points"
+        return f"{self.name} ({self.type}) with {self.num_sides} sides"
