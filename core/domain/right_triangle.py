@@ -1,14 +1,8 @@
 from core.domain.triangle import Triangle
-
+from core.domain.figure_type import FigureType
 
 class RightTriangle(Triangle):
-    def __init__(self, name, vertices, num_sides, figure_type):
-        super().__init__(name, vertices, num_sides, figure_type)
-
-    def calculate_area(self):
-        return super().calculate_area()
-    
-    def is_valid(self):
-        return super().is_valid()
+    def __init__(self, vertices):
+        super().__init__("Triángulo rectángulo", vertices, FigureType.RIGHT_TRIANGLE)
 
     
