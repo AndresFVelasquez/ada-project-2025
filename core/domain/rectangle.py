@@ -2,8 +2,8 @@ from core.domain.figure import Figure
 from core.domain.figure_type import FigureType
 
 class Rectangle(Figure):
-    def __init__(self, name, vertices):
-        super().__init__(name, vertices, FigureType.RECTANGLE)
+    def __init__(self, vertices):
+        super().__init__("Rectángulo", vertices, FigureType.RECTANGLE)
 
     def calculate_area(self) -> float:
         """
