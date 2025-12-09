@@ -17,4 +17,21 @@ class FigureFactory:
         Creates and returns a new figure instance based on the provided type.
         Assigns name automatically following the format: Type_consecutive
         """
-        pass
+        if figure_type == FigureType.SQUARE:
+            figure = Square(points)
+
+        elif figure_type == FigureType.RECTANGLE:
+            figure = Rectangle(points)
+
+        elif figure_type == FigureType.RIGHT_TRIANGLE:
+            figure = RightTriangle(points)
+
+        elif figure_type == FigureType.ACUTE_TRIANGLE:
+            figure = AcuteTriangle(points)
+
+        else:
+            raise ValueError(f"Unsupported FigureType: {figure_type}")
+
+        
+        return figure
+        
