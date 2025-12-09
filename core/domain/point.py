@@ -13,6 +13,9 @@ class Point:
         self.x = x
         self.y = y
 
+    def __repr__(self):
+        return f"({self.x}, {self.y})"
+    
     def distance_to(self, other: "Point") -> float:
         """
         Calculate the Euclidean distance between this point and another.
