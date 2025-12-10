@@ -9,6 +9,7 @@ from core.ui.draw_service import DrawService
 from core.ui.cartesian_plane_component import CartesianPlaneComponent
 from core.domain.point import Point
 
+import matplotlib.pyplot as plt
 class Menu:
 
     def __init__(self):
@@ -27,8 +28,16 @@ class Menu:
         # Centrar ventana
         self._center_window(450, 550)
 
+        self.root.protocol("WM_DELETE_WINDOW", self._on_close)
+
         self._build_ui()
 
+    # ----------------------------------------------------
+    # Cerrar todas las ventanas
+    # ----------------------------------------------------
+    def _on_close(self):
+        plt.close("all")   # Cerrar TODAS las ventanas de Matplotlib
+        self.root.destroy()  # Cerrar Tk correctamente
     # -----------------------------------------------------
     # Centrar ventana en pantalla
     # -----------------------------------------------------
@@ -83,6 +92,7 @@ class Menu:
         win = tk.Toplevel(self.root)
         win.title("Agregar Puntos")
         win.resizable(False, False)
+        win.protocol("WM_DELETE_WINDOW", win.destroy)
 
         # Centrar ventana secundaria
         self._center_child_window(win, 350, 250)
@@ -167,6 +177,7 @@ class Menu:
         win = tk.Toplevel(self.root)
         win.title("Figuras Detectadas")
         win.resizable(False, False)
+        win.protocol("WM_DELETE_WINDOW", win.destroy)
         self._center_child_window(win, 400, 500)
 
         tk.Label(win, text="Figuras Detectadas", font=("Arial", 14)).pack(pady=10)
