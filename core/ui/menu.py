@@ -196,7 +196,8 @@ class Menu:
     # -----------------------------------------------------
     def refresh_plane(self):
         points = self.data_manager.get_points()
-        self.plane.update(points)
+        figures = self.data_manager.get_figures()
+        self.plane.update(points, figures)
 
     # -----------------------------------------------------
     # INICIAR LOOP
