@@ -25,6 +25,10 @@ class ShapeDetector:
         tri_combinations = ShapeDetector.combine_three_points(point_list)
 
         for combo in tri_combinations:
+            # Skip if points are collinear (not a valid triangle)
+            if ShapeDetector.are_collinear(combo):
+                continue
+
             if ShapeDetector.is_right_triangle(combo):
                 normalized = ShapeDetector.normalize_vertices(combo)
                 fig = FigureFactory.create_figure(
@@ -40,6 +44,10 @@ class ShapeDetector:
         quad_combinations = ShapeDetector.combine_four_points(point_list)
 
         for combo in quad_combinations:
+            # Skip if any 3 points are collinear
+            if ShapeDetector.has_collinear_points(combo):
+                continue
+
             if ShapeDetector.is_square(combo):
                 normalized = ShapeDetector.normalize_vertices(combo)
                 fig = FigureFactory.create_figure(
@@ -136,6 +144,48 @@ class ShapeDetector:
     @staticmethod
     def is_acute(v1, v2) -> bool:
         return ShapeDetector.dot(v1, v2) > 0
+
+
+    #falla
+    @staticmethod
+    def are_collinear(points: list, tol=1e-6) -> bool:
+        """
+        Check if 3 or more points are collinear using cross product.
+        Returns True if points lie on the same line.
+        """
+        if len(points) < 3:
+            return False
+
+        # Use first 3 points to check
+        p1, p2, p3 = points[0], points[1], points[2]
+
+        # Calculate cross product of vectors (p2-p1) and (p3-p1)
+        # If cross product is 0, points are collinear
+        v1_x = p2.x - p1.x
+        v1_y = p2.y - p1.y
+        v2_x = p3.x - p1.x
+        v2_y = p3.y - p1.y
+
+        cross_product = abs(v1_x * v2_y - v1_y * v2_x)
+        return cross_product < tol
+
+    @staticmethod
+    def has_collinear_points(points: list) -> bool:
+        """
+        Check if any 3 points in a set of 4 points are collinear.
+        Returns True if any combination of 3 points is collinear.
+        """
+        if len(points) != 4:
+            return False
+
+        # Check all combinations of 3 points
+        for i in range(4):
+            for j in range(i + 1, 4):
+                for k in range(j + 1, 4):
+                    if ShapeDetector.are_collinear([points[i], points[j], points[k]]):
+                        return True
+        return False
+
     # ----------------------------------------------------
     # COMBINACIONES
     # ----------------------------------------------------
