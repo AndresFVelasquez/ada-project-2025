@@ -6,55 +6,25 @@ class DataManager:
     """
     Handles saving and loading points and figures from files.
     """
+    def __init__(self):
+        self.points = []
+        self.figures = []
 
+    def add_point(self, p):
+        if p in self.points:
+            return False
+        self.points.append(p)
+        return True
 
-    points = []
-    figures = []
+    def get_points(self):
+        return self.points
 
+    def get_figures(self):
+        return self.figures
 
-    @staticmethod
-    def save_points():
-        """Persist the list of points to a file (JSON recommended)."""
-        pass
+    def save_points(self):
+        pass  # luego lo implementas
 
+    def load_points(self):
+        pass  # luego lo implementas
 
-    @staticmethod
-    def load_points():
-        """Load points from a file and restore internal structure."""
-        pass
-
-
-    @staticmethod
-    def save_figures():
-        """Persist the list of figures to a file (JSON recommended)."""
-        pass
-
-
-    @staticmethod
-    def load_figures():
-        """Load figures from a file and restore internal structure."""
-        pass
-
-
-    @staticmethod
-    def add_point(point: Point):
-        """Add a point ensuring no duplicates exist."""
-        pass
-
-
-    @staticmethod
-    def remove_point(point: Point):
-        """Remove a point if present."""
-        pass
-
-
-    @staticmethod
-    def get_points() -> list:
-        """Return the list of stored points."""
-        pass
-
-
-    @staticmethod
-    def get_figures() -> list:
-        """Return the list of stored figures."""
-        pass

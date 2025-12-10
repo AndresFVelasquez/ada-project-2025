@@ -6,113 +6,35 @@ from core.domain.figure_type import FigureType
 
 
 class DrawService:
-
     """
-    Responsible for drawing points, figures, and the Cartesian plane.
-    Does NOT modify data.
+    Draws points, figures and the Cartesian plane.
+    Pure rendering. No UI logic. No filtering logic.
     """
 
     def __init__(self):
         self.fig, self.ax = plt.subplots(figsize=(10, 6))
         self.ax.set_aspect('equal')
-        self.selected_figure_type = None  # None significa "Todas"
-        self._setup_radio_buttons()
         self._connect_events()
 
-        # Color palette for triangles
-        self.triangle_colors = ['red', 'blue', 'green',
-                                'purple', 'cyan', 'magenta', 'yellow', 'orange']
-        self.triangle_color_index = 0
+        self._filter_type = None
+        # Cache only for redraw, not for UI logic
+        self._points = []
+        self._figures = []
 
-    def _setup_radio_buttons(self):
-        # Crear espacio para los botones de radio a la derecha
-        self.fig.subplots_adjust(right=0.75)
-        rax = self.fig.add_axes([0.78, 0.4, 0.18, 0.3])
+    def set_filter(self, figure_type):
+        self._filter_type = figure_type
 
-        # Opciones de selección
-        labels = ['Todas', 'SQUARE', 'RECTANGLE',
-                  'RIGHT_TRIANGLE', 'ACUTE_TRIANGLE']
-        self.radio = RadioButtons(rax, labels, active=0)
-        self.radio.on_clicked(self._on_radio_change)
-
-        # Título para el selector
-        rax.set_title('Colorear:', fontsize=10, fontweight='bold')
-
-    def _on_radio_change(self, label):
-        # Actualizar el tipo de figura seleccionado
-        if label == 'Todas':
-            self.selected_figure_type = None
-        else:
-            self.selected_figure_type = FigureType[label]
-
-        # Reset triangle color index
-        self.triangle_color_index = 0
-
-        # Redibujar todo
-        self.ax.clear()
-        self.draw_cartesian_plane()
-        if hasattr(self, '_cached_points'):
-            self.draw_points(self._cached_points)
-        if hasattr(self, '_cached_figures'):
-            self.draw_figures(self._cached_figures)
-        self.fig.canvas.draw_idle()
-
-    def draw_points(self, points: list):
-        pass
-
-    def draw_figures(self, figures: list):
-        # Guardar figuras en caché para redibujar
-        self._cached_figures = figures
-
-        # Reset triangle color index at the start of drawing
-        self.triangle_color_index = 0
-
-        for figure in figures:
-            # Determinar si esta figura debe ser coloreada
-            should_color = (self.selected_figure_type is None or
-                            figure.type == self.selected_figure_type)
-
-            if should_color:
-                # Aplicar color según el tipo
-                if figure.type == FigureType.SQUARE:
-                    color = 'green'
-                elif figure.type == FigureType.RECTANGLE:
-                    color = 'orange'
-                elif figure.type in [FigureType.RIGHT_TRIANGLE, FigureType.ACUTE_TRIANGLE]:
-                    # Assign unique color to each triangle
-                    color = self.triangle_colors[self.triangle_color_index % len(
-                        self.triangle_colors)]
-                    self.triangle_color_index += 1
-                else:
-                    color = 'black'
-
-                # Figuras seleccionadas: muy visibles con bordes gruesos
-                alpha = 0.7
-                linewidth = 5
-            else:
-                # Figuras no seleccionadas en gris y más transparentes
-                color = 'gray'
-                alpha = 0.2
-                linewidth = 1.5
-
-            # Dibujar solo el borde del polígono (sin relleno)
-            xs = [p.x for p in figure.vertices]
-            ys = [p.y for p in figure.vertices]
-
-            # Solo dibujar la línea del contorno
-            self.ax.plot(xs + [xs[0]], ys + [ys[0]], color=color,
-                         linewidth=linewidth, label=figure.type.name)
-
-    def draw_cartesian_plane(self):
-        pass
-
+    # --------------------------
+    # Event hookup
+    # --------------------------
     def _connect_events(self):
-        # Evento para zoom solamente
         self.fig.canvas.mpl_connect('scroll_event', self._on_zoom)
 
     def _on_zoom(self, event):
-        # Zoom con la rueda del mouse
         scale = 1.1 if event.button == 'up' else 0.9
+        if event.xdata is None or event.ydata is None:
+            return
+        
         self.ax.set_xlim(
             event.xdata - (event.xdata - self.ax.get_xlim()[0]) * scale,
             event.xdata + (self.ax.get_xlim()[1] - event.xdata) * scale
@@ -123,24 +45,47 @@ class DrawService:
         )
         self.fig.canvas.draw_idle()
 
+    # --------------------------
+    # Drawing
+    # --------------------------
     def draw_cartesian_plane(self):
         self.ax.axhline(0, color='black', linewidth=1)
         self.ax.axvline(0, color='black', linewidth=1)
-
-        self.ax.set_xlabel('X')
-        self.ax.set_ylabel('Y')
-
-        self.ax.grid(True, color="gray", linestyle="--", linewidth=0.5)
+        self.ax.set_xlabel("X")
+        self.ax.set_ylabel("Y")
+        self.ax.grid(True, linestyle="--", linewidth=0.5, alpha=0.6)
 
     def draw_points(self, points):
-        # Guardar puntos en caché para redibujar
-        self._cached_points = points
+        self._points = points
         xs = [p.x for p in points]
         ys = [p.y for p in points]
-        self.ax.scatter(xs, ys, color='red')
-        # Dibujar coordenadas
+        self.ax.scatter(xs, ys, color="red", s=40)
+
         for p in points:
-            self.ax.text(p.x + 0.1, p.y + 0.1, f"({p.x}, {p.y})", fontsize=9)
+            self.ax.text(p.x + 0.1, p.y + 0.1,
+                         f"({p.x},{p.y})", fontsize=8)
+
+    def draw_figures(self, figures):
+        self._figures = figures
+
+        for fig in figures:
+            if self._filter_type is not None and fig.type != self._filter_type:
+                continue  # No dibujar figuras no seleccionadas
+
+            xs = [p.x for p in fig.vertices] + [fig.vertices[0].x]
+            ys = [p.y for p in fig.vertices] + [fig.vertices[0].y]
+            self.ax.plot(xs, ys, linewidth=2)
+
+    # --------------------------
+    # Full redraw
+    # --------------------------
+    def redraw(self):
+        self.ax.clear()
+        self.draw_cartesian_plane()
+        if self._points:
+            self.draw_points(self._points)
+        if self._figures:
+            self.draw_figures(self._figures)
         self.fig.canvas.draw_idle()
 
     def show(self):
