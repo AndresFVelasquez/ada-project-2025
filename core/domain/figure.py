@@ -11,6 +11,8 @@ class Figure(ABC):
         self.type = figure_type
         self.num_sides = len(vertices)
         self.area = 0.0
+        # Calculate the area before returning the figure
+        self.calculate_area()
 
     @abstractmethod
     def calculate_area(self) -> float:

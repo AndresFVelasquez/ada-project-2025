@@ -10,6 +10,8 @@ from core.ui.cartesian_plane_component import CartesianPlaneComponent
 from core.domain.point import Point
 
 import matplotlib.pyplot as plt
+
+
 class Menu:
 
     def __init__(self):
@@ -41,6 +43,7 @@ class Menu:
     # -----------------------------------------------------
     # Centrar ventana en pantalla
     # -----------------------------------------------------
+
     def _center_window(self, width, height):
         self.root.update_idletasks()
         screen_w = self.root.winfo_screenwidth()
@@ -55,7 +58,8 @@ class Menu:
     # UI PRINCIPAL
     # -----------------------------------------------------
     def _build_ui(self):
-        title = tk.Label(self.root, text="Menú Principal", font=("Arial", 18, "bold"))
+        title = tk.Label(self.root, text="Menú Principal",
+                         font=("Arial", 18, "bold"))
         title.pack(pady=15)
 
         # Ancho consistente para los botones
@@ -108,7 +112,8 @@ class Menu:
                 x, y = map(int, value.split(","))
                 p = Point(x, y)
 
-                print("Lista actual de puntos:", self.data_manager.get_points())
+                print("Lista actual de puntos:",
+                      self.data_manager.get_points())
                 print("Intentando agregar:", p)
 
                 if not self.data_manager.add_point(p):
@@ -120,9 +125,8 @@ class Menu:
 
         ttk.Button(win, text="Agregar Punto", command=agregar).pack(pady=15)
 
-        
-
     # Centrar ventanas hijas
+
     def _center_child_window(self, win, w, h):
         win.update_idletasks()
         x = (win.winfo_screenwidth() // 2) - (w // 2)
@@ -162,7 +166,8 @@ class Menu:
             messagebox.showwarning("Sin figuras", "Primero detecte figuras.")
             return
 
-        self.data_manager.figures = self.sorter.sort_by_area(self.data_manager.figures)
+        self.data_manager.figures = self.sorter.sort_by_area(
+            self.data_manager.figures)
         messagebox.showinfo("OK", "Figuras ordenadas por área.")
 
     # -----------------------------------------------------
@@ -178,17 +183,26 @@ class Menu:
         win.title("Figuras Detectadas")
         win.resizable(False, False)
         win.protocol("WM_DELETE_WINDOW", win.destroy)
-        self._center_child_window(win, 400, 500)
+        self._center_child_window(win, 600, 500)
 
-        tk.Label(win, text="Figuras Detectadas", font=("Arial", 14)).pack(pady=10)
+        tk.Label(win, text="Figuras Detectadas",
+                 font=("Arial", 14)).pack(pady=10)
 
-        listbox = tk.Listbox(win, width=55, height=20)
-        listbox.pack(pady=10, fill=tk.BOTH, expand=False)
+        # Create frame for list and canvas
+        content_frame = tk.Frame(win)
+        content_frame.pack(pady=10, fill=tk.BOTH, expand=True)
+
+        # Listbox on the left
+        list_frame = tk.Frame(content_frame)
+        list_frame.pack(side=tk.LEFT, padx=10)
+
+        listbox = tk.Listbox(list_frame, width=55, height=20)
+        listbox.pack(fill=tk.BOTH, expand=True)
 
         for f in figs:
             listbox.insert(
                 tk.END,
-                f"{f.name} | Área: {f.area:.2f} | Tipo: {f.type.name} | Visible: {f.visible}"
+                f"{f.name} | Área: {f.area:.2f} | Tipo: {f.type.name}"
             )
 
     # -----------------------------------------------------
@@ -197,7 +211,11 @@ class Menu:
     def refresh_plane(self):
         points = self.data_manager.get_points()
         figures = self.data_manager.get_figures()
-        self.plane.update(points, figures)
+
+        # Reuse existing instances to maintain matplotlib state
+        draw_service = DrawService()
+        plane = CartesianPlaneComponent(draw_service)
+        plane.update(points, figures)
 
     # -----------------------------------------------------
     # INICIAR LOOP

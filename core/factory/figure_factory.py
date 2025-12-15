@@ -5,6 +5,7 @@ from core.domain.acute_triangle import AcuteTriangle
 from core.domain.figure_type import FigureType
 from core.domain.figure import Figure
 
+
 class FigureFactory:
     """
     Responsible for creating figure instances based on type.
@@ -32,6 +33,4 @@ class FigureFactory:
         else:
             raise ValueError(f"Unsupported FigureType: {figure_type}")
 
-        
         return figure
-        
