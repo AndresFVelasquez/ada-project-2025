@@ -155,7 +155,7 @@ class Menu:
         ttk.Separator(main_frame, orient='horizontal').pack(fill='x', pady=15)
 
         ttk.Button(main_frame, text="Salir", width=BTN_WIDTH,
-                   command=self.root.quit).pack(pady=5)
+                   command=self._on_close).pack(pady=5)
 
     # -----------------------------------------------------
     # AGREGAR PUNTOS
