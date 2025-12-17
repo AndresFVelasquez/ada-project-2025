@@ -67,7 +67,7 @@ class ShapeDetector:
 
     @staticmethod
     def side_length(p1: Point, p2: Point) -> float:
-        return math.dist((p1.x, p1.y), (p2.x, p2.y))
+        return p1.distance_to(p2)
 
     # ----------------------------------------------------
     # COMBINACIONES
