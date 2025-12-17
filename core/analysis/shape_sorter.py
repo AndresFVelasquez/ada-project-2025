@@ -1,18 +1,12 @@
-<<<<<<< HEAD
-=======
+
 from core.domain.figure import Figure
 
-
->>>>>>> sebastianProticFinal
 class ShapeSorter:
     """
     Clase estática encargada de ordenar figuras según su área.
     """
-<<<<<<< HEAD
-    
-=======
 
->>>>>>> sebastianProticFinal
+
     @staticmethod
     def sort_by_area(figures, ascending=True):
         """
