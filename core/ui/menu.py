@@ -291,12 +291,16 @@ class Menu:
     # MOSTRAR PLANO
     # -----------------------------------------------------
     def refresh_plane(self):
+        #Evitar ventanas duplicadas
+        plt.close("all")
+
         points = self.data_manager.get_points()
         figures = self.data_manager.get_figures()
 
         # Reuse existing instances to maintain matplotlib state
         draw_service = DrawService()
         plane = CartesianPlaneComponent(draw_service)
+        
         plane.update(points, figures)
 
     # -----------------------------------------------------
