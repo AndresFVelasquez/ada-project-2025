@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk, messagebox, simpledialog
+from tkinter import ttk, messagebox, simpledialog, filedialog
 
 
 from core.data.data_manager import DataManager
@@ -41,7 +41,7 @@ class Menu:
         self._configure_styles()
 
         # Centrar ventana
-        self._center_window(450, 550)
+        self._center_window(450, 700)
 
         self.root.protocol("WM_DELETE_WINDOW", self._on_close)
 
@@ -235,8 +235,29 @@ class Menu:
 
         figures = self.detector.detect_shapes(points)
         self.data_manager.figures = figures
+        
+        # Contar figuras por tipo
+        from core.domain.figure_type import FigureType
+        
+        counts = {
+            FigureType.SQUARE: 0,
+            FigureType.RECTANGLE: 0,
+            FigureType.RIGHT_TRIANGLE: 0,
+            FigureType.ACUTE_TRIANGLE: 0
+        }
+        
+        for fig in figures:
+            if fig.type in counts:
+                counts[fig.type] += 1
+                
+        # Crear mensaje detallado
+        msg = f"Figuras detectadas: {len(figures)}\n\n"
+        msg += f"Cuadrados: {counts[FigureType.SQUARE]}\n"
+        msg += f"Rectángulos: {counts[FigureType.RECTANGLE]}\n"
+        msg += f"Triángulos Rectángulos: {counts[FigureType.RIGHT_TRIANGLE]}\n"
+        msg += f"Triángulos Acutángulos: {counts[FigureType.ACUTE_TRIANGLE]}"
 
-        messagebox.showinfo("OK", f"Figuras detectadas: {len(figures)}")
+        messagebox.showinfo("Resultados de Detección", msg)
 
     # -----------------------------------------------------
     # ORDENAR FIGURAS
@@ -259,6 +280,9 @@ class Menu:
             messagebox.showwarning("Sin Figuras", "No hay figuras detectadas.")
             return
 
+        # 1. Ordenar para coincidir con el JSON
+        figs = self.sorter.sort_by_area(figs)
+
         win = tk.Toplevel(self.root)
         win.title("Figuras Detectadas")
         win.resizable(False, False)
@@ -269,7 +293,7 @@ class Menu:
         container = ttk.Frame(win)
         container.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
-        tk.Label(container, text="Figuras Detectadas",
+        tk.Label(container, text="Figuras Detectadas (Ordenadas)",
                  font=self.FONT_TITLE, bg=self.COLOR_BG, fg=self.COLOR_ACCENT).pack(pady=10)
 
         # Create frame for list and canvas
@@ -284,11 +308,22 @@ class Menu:
                              bg=self.COLOR_BTN_BG, fg="white", selectbackground=self.COLOR_ACCENT, relief="flat", font=self.FONT_NORMAL)
         listbox.pack(fill=tk.BOTH, expand=True)
 
+        # 2. Generar nombres secuenciales (Triángulo 1, Triángulo 2...)
+        name_counters = {}
         for f in figs:
-            listbox.insert(
-                tk.END,
-                f"{f.name} | Área: {f.area:.2f} | Tipo: {f.type.name}"
-            )
+            count = name_counters.get(f.name, 0) + 1
+            name_counters[f.name] = count
+            identifier = f"{f.name} {count}"
+
+            listbox.insert(tk.END, f"=== {identifier} ===")
+            listbox.insert(tk.END, f"  • Área: {f.area:.2f}")
+          
+            
+            # Formatear puntos para que no ocupen demasiado espacio
+            points_str = ", ".join([f"({p.x},{p.y})" for p in f.vertices])
+            listbox.insert(tk.END, f"  • Puntos: [{points_str}]")
+            
+            listbox.insert(tk.END, "-" * 60)
 
     # -----------------------------------------------------
     # MOSTRAR PLANO

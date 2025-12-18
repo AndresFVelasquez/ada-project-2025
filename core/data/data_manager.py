@@ -41,6 +41,40 @@ class DataManager:
     def get_figures(self):
         return self.figures
 
+    def save_figures(self, filename: str):
+        """
+        Guarda la lista de figuras en un archivo JSON con el formato solicitado:
+        - identificador (nombre)
+        - área
+        - conjunto de puntos
+        
+        Si hay múltiples figuras del mismo tipo, agrega un número secuencial (ej. "Triángulo 1", "Triángulo 2").
+        """
+        data = []
+        name_counters = {}
+
+        for fig in self.figures:
+            # Obtener contador actual para este nombre, por defecto 0
+            count = name_counters.get(fig.name, 0) + 1
+            name_counters[fig.name] = count
+            
+            # Crear identificador único
+            identifier = f"{fig.name} {count}"
+
+            data.append({
+                "identifier": identifier,
+                "area": fig.area,
+                "points": [{"x": p.x, "y": p.y} for p in fig.vertices]
+            })
+        
+        try:
+            with open(filename, 'w') as f:
+                json.dump(data, f, indent=4)
+            return True
+        except Exception as e:
+            print(f"Error saving figures: {e}")
+            return False
+
     def save_points(self):
         pass  # luego lo implementas
 

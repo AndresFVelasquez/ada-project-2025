@@ -68,13 +68,27 @@ class DrawService:
     def draw_figures(self, figures):
         self._figures = figures
 
+        # Definir colores para cada tipo de figura
+        colors = {
+            FigureType.SQUARE: "red",
+            FigureType.RECTANGLE: "yellow",
+            FigureType.RIGHT_TRIANGLE: "blue",
+            FigureType.ACUTE_TRIANGLE: "green"
+        }
+
         for fig in figures:
             if self._filter_type is not None and fig.type != self._filter_type:
                 continue  # No dibujar figuras no seleccionadas
 
             xs = [p.x for p in fig.vertices] + [fig.vertices[0].x]
             ys = [p.y for p in fig.vertices] + [fig.vertices[0].y]
-            self.ax.plot(xs, ys, linewidth=2)
+            
+            # Obtener color correspondiente o usar negro por defecto
+            color = colors.get(fig.type, "black")
+            
+            # Dibujar borde y rellenar área
+            self.ax.plot(xs, ys, color=color, linewidth=2)
+            self.ax.fill(xs, ys, color=color, alpha=0.3)  # Relleno semitransparente
 
     # --------------------------
     # Full redraw
