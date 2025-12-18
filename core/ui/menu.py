@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, simpledialog
 
 
 from core.data.data_manager import DataManager
@@ -151,6 +151,9 @@ class Menu:
         ttk.Button(main_frame, text="Mostrar Plano Cartesiano", width=BTN_WIDTH,
                    command=self.refresh_plane).pack(pady=4)
 
+        ttk.Button(main_frame, text="Cargar Prueba", width=BTN_WIDTH,
+                   command=self.show_load_test_window).pack(pady=4)
+
         # Separador final
         ttk.Separator(main_frame, orient='horizontal').pack(fill='x', pady=15)
 
@@ -291,7 +294,7 @@ class Menu:
     # MOSTRAR PLANO
     # -----------------------------------------------------
     def refresh_plane(self):
-        #Evitar ventanas duplicadas
+        # Evitar ventanas duplicadas
         plt.close("all")
 
         points = self.data_manager.get_points()
@@ -300,8 +303,20 @@ class Menu:
         # Reuse existing instances to maintain matplotlib state
         draw_service = DrawService()
         plane = CartesianPlaneComponent(draw_service)
-        
+
         plane.update(points, figures)
+
+    # -----------------------------------------------------
+    # CARGAR PRUEBA
+    # -----------------------------------------------------
+    def show_load_test_window(self):
+        val = simpledialog.askinteger("Cargar Prueba", "Seleccione lista (0-3):",
+                                      parent=self.root, minvalue=0, maxvalue=3)
+        if val is not None:
+            self.data_manager.points = []
+            for p in self.data_manager.test_list(val):
+                self.data_manager.add_point(p)
+            messagebox.showinfo("Listo", "Puntos cargados.")
 
     # -----------------------------------------------------
     # INICIAR LOOP
