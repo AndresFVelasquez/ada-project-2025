@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, simpledialog, filedialog
 
 
 from core.data.data_manager import DataManager
@@ -10,7 +10,18 @@ from core.ui.cartesian_plane_component import CartesianPlaneComponent
 from core.domain.point import Point
 
 import matplotlib.pyplot as plt
+
+
 class Menu:
+    # --- Colores y Estilos (Dark Tech Theme) ---
+    COLOR_BG = "#21252B"       # Fondo oscuro principal
+    COLOR_FG = "#D7DAE0"       # Texto claro
+    COLOR_ACCENT = "#61AFEF"   # Azul brillante para acciones principales
+    COLOR_BTN_BG = "#3E4451"   # Fondo de botones
+    COLOR_BTN_HOVER = "#505868"  # Color al pasar el mouse
+
+    FONT_TITLE = ("Segoe UI", 18, "bold")
+    FONT_NORMAL = ("Segoe UI", 11)
 
     def __init__(self):
         # --- Dependencias del sistema ---
@@ -24,13 +35,50 @@ class Menu:
         self.root = tk.Tk()
         self.root.title("Sistema Geométrico - Menú Principal")
         self.root.resizable(False, False)
+        self.root.configure(bg=self.COLOR_BG)
+
+        # Configurar estilos
+        self._configure_styles()
 
         # Centrar ventana
-        self._center_window(450, 550)
+        self._center_window(450, 700)
 
         self.root.protocol("WM_DELETE_WINDOW", self._on_close)
 
         self._build_ui()
+
+    # ----------------------------------------------------
+    # Configuración de Estilos (ttk)
+    # ----------------------------------------------------
+    def _configure_styles(self):
+        style = ttk.Style()
+        style.theme_use('clam')  # Base theme que permite mayor personalización
+
+        # Configurar Frame principal
+        style.configure("TFrame", background=self.COLOR_BG)
+
+        # Configurar Label
+        style.configure("TLabel",
+                        background=self.COLOR_BG,
+                        foreground=self.COLOR_FG,
+                        font=self.FONT_NORMAL)
+
+        # Configurar Botones Genéricos
+        style.configure("TButton",
+                        font=self.FONT_NORMAL,
+                        background=self.COLOR_BTN_BG,
+                        foreground=self.COLOR_FG,
+                        borderwidth=0,
+                        focuscolor=self.COLOR_ACCENT)
+
+        # Mapeo de estados para efectos hover/active
+        style.map("TButton",
+                  background=[('active', self.COLOR_BTN_HOVER),
+                              ('pressed', self.COLOR_ACCENT)],
+                  foreground=[('active', '#FFFFFF'), ('pressed', '#FFFFFF')])
+
+        # Configurar Separador
+        style.configure("TSeparator", background=self.COLOR_BTN_BG)
 
     # ----------------------------------------------------
     # Cerrar todas las ventanas
@@ -41,6 +89,7 @@ class Menu:
     # -----------------------------------------------------
     # Centrar ventana en pantalla
     # -----------------------------------------------------
+
     def _center_window(self, width, height):
         self.root.update_idletasks()
         screen_w = self.root.winfo_screenwidth()
@@ -55,35 +104,61 @@ class Menu:
     # UI PRINCIPAL
     # -----------------------------------------------------
     def _build_ui(self):
-        title = tk.Label(self.root, text="Menú Principal", font=("Arial", 18, "bold"))
-        title.pack(pady=15)
+        # Frame principal para aplicar fondo y padding
+        main_frame = ttk.Frame(self.root)
+        main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+
+        title = tk.Label(main_frame, text="Menú Principal",
+                         font=self.FONT_TITLE, bg=self.COLOR_BG, fg=self.COLOR_ACCENT)
+        title.pack(pady=(0, 15))
+
+        # Separador inicial
+        ttk.Separator(main_frame, orient='horizontal').pack(
+            fill='x', pady=(0, 10))
 
         # Ancho consistente para los botones
         BTN_WIDTH = 32
 
-        ttk.Button(self.root, text="Agregar Puntos", width=BTN_WIDTH,
-                   command=self.show_add_points_window).pack(pady=8)
+        # --- SECCIÓN: DATOS ---
+        tk.Label(main_frame, text="GESTIÓN DE DATOS",
+                 bg=self.COLOR_BG, fg="#ABB2BF", font=("Segoe UI", 9, "bold")).pack(anchor="w", pady=(5, 5))
 
-        ttk.Button(self.root, text="Guardar Puntos", width=BTN_WIDTH,
-                   command=self.save_data).pack(pady=8)
+        ttk.Button(main_frame, text="Agregar Puntos", width=BTN_WIDTH,
+                   command=self.show_add_points_window).pack(pady=4)
 
-        ttk.Button(self.root, text="Cargar Puntos", width=BTN_WIDTH,
-                   command=self.load_data).pack(pady=8)
+        ttk.Button(main_frame, text="Guardar Puntos", width=BTN_WIDTH,
+                   command=self.save_data).pack(pady=4)
 
-        ttk.Button(self.root, text="Detectar Figuras", width=BTN_WIDTH,
-                   command=self.detect_shapes).pack(pady=8)
+        ttk.Button(main_frame, text="Cargar Puntos", width=BTN_WIDTH,
+                   command=self.load_data).pack(pady=4)
 
-        ttk.Button(self.root, text="Ordenar Figuras por Área", width=BTN_WIDTH,
-                   command=self.sort_figures).pack(pady=8)
+        # Separador intermedio
+        ttk.Separator(main_frame, orient='horizontal').pack(fill='x', pady=15)
 
-        ttk.Button(self.root, text="Mostrar Figuras Detectadas", width=BTN_WIDTH,
-                   command=self.show_figures_window).pack(pady=8)
+        # --- SECCIÓN: OPERACIONES ---
+        tk.Label(main_frame, text="OPERACIONES Y VISUALIZACIÓN",
+                 bg=self.COLOR_BG, fg="#ABB2BF", font=("Segoe UI", 9, "bold")).pack(anchor="w", pady=(5, 5))
 
-        ttk.Button(self.root, text="Mostrar Plano Cartesiano", width=BTN_WIDTH,
-                   command=self.refresh_plane).pack(pady=8)
+        ttk.Button(main_frame, text="Detectar Figuras", width=BTN_WIDTH,
+                   command=self.detect_shapes).pack(pady=4)
 
-        ttk.Button(self.root, text="Salir", width=BTN_WIDTH,
-                   command=self.root.quit).pack(pady=20)
+        ttk.Button(main_frame, text="Ordenar Figuras por Área", width=BTN_WIDTH,
+                   command=self.sort_figures).pack(pady=4)
+
+        ttk.Button(main_frame, text="Mostrar Figuras Detectadas", width=BTN_WIDTH,
+                   command=self.show_figures_window).pack(pady=4)
+
+        ttk.Button(main_frame, text="Mostrar Plano Cartesiano", width=BTN_WIDTH,
+                   command=self.refresh_plane).pack(pady=4)
+
+        ttk.Button(main_frame, text="Cargar Prueba", width=BTN_WIDTH,
+                   command=self.show_load_test_window).pack(pady=4)
+
+        # Separador final
+        ttk.Separator(main_frame, orient='horizontal').pack(fill='x', pady=15)
+
+        ttk.Button(main_frame, text="Salir", width=BTN_WIDTH,
+                   command=self._on_close).pack(pady=5)
 
     # -----------------------------------------------------
     # AGREGAR PUNTOS
@@ -92,15 +167,22 @@ class Menu:
         win = tk.Toplevel(self.root)
         win.title("Agregar Puntos")
         win.resizable(False, False)
+        win.configure(bg=self.COLOR_BG)
         win.protocol("WM_DELETE_WINDOW", win.destroy)
 
         # Centrar ventana secundaria
         self._center_child_window(win, 350, 250)
 
-        tk.Label(win, text="Ingrese un punto en formato x,y:").pack(pady=10)
+        # Contenedor con estilo
+        container = ttk.Frame(win)
+        container.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
 
-        entry = tk.Entry(win, width=20)
-        entry.pack()
+        tk.Label(container, text="Ingrese un punto en formato x,y:",
+                 bg=self.COLOR_BG, fg=self.COLOR_FG, font=self.FONT_NORMAL).pack(pady=10)
+
+        entry = tk.Entry(container, width=20, bg=self.COLOR_BTN_BG,
+                         fg="white", insertbackground="white", relief="flat")
+        entry.pack(pady=5)
 
         def agregar():
             value = entry.get().strip()
@@ -108,21 +190,23 @@ class Menu:
                 x, y = map(int, value.split(","))
                 p = Point(x, y)
 
-                print("Lista actual de puntos:", self.data_manager.get_points())
+                print("Lista actual de puntos:",
+                      self.data_manager.get_points())
                 print("Intentando agregar:", p)
 
                 if not self.data_manager.add_point(p):
                     messagebox.showerror("Duplicado", "Ese punto ya existe.")
                 else:
                     messagebox.showinfo("OK", "Punto agregado.")
+                    entry.delete(0, tk.END)  # Limpiar entrada
             except:
                 messagebox.showerror("Error", "Formato inválido. Use x,y")
 
-        ttk.Button(win, text="Agregar Punto", command=agregar).pack(pady=15)
-
-        
+        ttk.Button(container, text="Agregar Punto",
+                   command=agregar).pack(pady=15)
 
     # Centrar ventanas hijas
+
     def _center_child_window(self, win, w, h):
         win.update_idletasks()
         x = (win.winfo_screenwidth() // 2) - (w // 2)
@@ -151,8 +235,29 @@ class Menu:
 
         figures = self.detector.detect_shapes(points)
         self.data_manager.figures = figures
+        
+        # Contar figuras por tipo
+        from core.domain.figure_type import FigureType
+        
+        counts = {
+            FigureType.SQUARE: 0,
+            FigureType.RECTANGLE: 0,
+            FigureType.RIGHT_TRIANGLE: 0,
+            FigureType.ACUTE_TRIANGLE: 0
+        }
+        
+        for fig in figures:
+            if fig.type in counts:
+                counts[fig.type] += 1
+                
+        # Crear mensaje detallado
+        msg = f"Figuras detectadas: {len(figures)}\n\n"
+        msg += f"Cuadrados: {counts[FigureType.SQUARE]}\n"
+        msg += f"Rectángulos: {counts[FigureType.RECTANGLE]}\n"
+        msg += f"Triángulos Rectángulos: {counts[FigureType.RIGHT_TRIANGLE]}\n"
+        msg += f"Triángulos Acutángulos: {counts[FigureType.ACUTE_TRIANGLE]}"
 
-        messagebox.showinfo("OK", f"Figuras detectadas: {len(figures)}")
+        messagebox.showinfo("Resultados de Detección", msg)
 
     # -----------------------------------------------------
     # ORDENAR FIGURAS
@@ -162,7 +267,8 @@ class Menu:
             messagebox.showwarning("Sin figuras", "Primero detecte figuras.")
             return
 
-        self.data_manager.figures = self.sorter.sort_by_area(self.data_manager.figures)
+        self.data_manager.figures = self.sorter.sort_by_area(
+            self.data_manager.figures)
         messagebox.showinfo("OK", "Figuras ordenadas por área.")
 
     # -----------------------------------------------------
@@ -174,30 +280,78 @@ class Menu:
             messagebox.showwarning("Sin Figuras", "No hay figuras detectadas.")
             return
 
+        # 1. Ordenar para coincidir con el JSON
+        figs = self.sorter.sort_by_area(figs)
+
         win = tk.Toplevel(self.root)
         win.title("Figuras Detectadas")
         win.resizable(False, False)
+        win.configure(bg=self.COLOR_BG)
         win.protocol("WM_DELETE_WINDOW", win.destroy)
-        self._center_child_window(win, 400, 500)
+        self._center_child_window(win, 600, 500)
 
-        tk.Label(win, text="Figuras Detectadas", font=("Arial", 14)).pack(pady=10)
+        container = ttk.Frame(win)
+        container.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
-        listbox = tk.Listbox(win, width=55, height=20)
-        listbox.pack(pady=10, fill=tk.BOTH, expand=False)
+        tk.Label(container, text="Figuras Detectadas (Ordenadas)",
+                 font=self.FONT_TITLE, bg=self.COLOR_BG, fg=self.COLOR_ACCENT).pack(pady=10)
 
+        # Create frame for list and canvas
+        content_frame = ttk.Frame(container)
+        content_frame.pack(pady=10, fill=tk.BOTH, expand=True)
+
+        # Listbox on the left
+        list_frame = ttk.Frame(content_frame)
+        list_frame.pack(side=tk.LEFT, padx=10, fill=tk.BOTH, expand=True)
+
+        listbox = tk.Listbox(list_frame, width=55, height=20,
+                             bg=self.COLOR_BTN_BG, fg="white", selectbackground=self.COLOR_ACCENT, relief="flat", font=self.FONT_NORMAL)
+        listbox.pack(fill=tk.BOTH, expand=True)
+
+        # 2. Generar nombres secuenciales (Triángulo 1, Triángulo 2...)
+        name_counters = {}
         for f in figs:
-            listbox.insert(
-                tk.END,
-                f"{f.name} | Área: {f.area:.2f} | Tipo: {f.type.name} | Visible: {f.visible}"
-            )
+            count = name_counters.get(f.name, 0) + 1
+            name_counters[f.name] = count
+            identifier = f"{f.name} {count}"
+
+            listbox.insert(tk.END, f"=== {identifier} ===")
+            listbox.insert(tk.END, f"  • Área: {f.area:.2f}")
+          
+            
+            # Formatear puntos para que no ocupen demasiado espacio
+            points_str = ", ".join([f"({p.x},{p.y})" for p in f.vertices])
+            listbox.insert(tk.END, f"  • Puntos: [{points_str}]")
+            
+            listbox.insert(tk.END, "-" * 60)
 
     # -----------------------------------------------------
     # MOSTRAR PLANO
     # -----------------------------------------------------
     def refresh_plane(self):
+        # Evitar ventanas duplicadas
+        plt.close("all")
+
         points = self.data_manager.get_points()
         figures = self.data_manager.get_figures()
-        self.plane.update(points, figures)
+
+        # Reuse existing instances to maintain matplotlib state
+        draw_service = DrawService()
+        plane = CartesianPlaneComponent(draw_service)
+
+        plane.update(points, figures)
+
+    # -----------------------------------------------------
+    # CARGAR PRUEBA
+    # -----------------------------------------------------
+    def show_load_test_window(self):
+        val = simpledialog.askinteger("Cargar Prueba", "Seleccione lista (0-3):",
+                                      parent=self.root, minvalue=0, maxvalue=3)
+        if val is not None:
+            self.data_manager.points = []
+            for p in self.data_manager.test_list(val):
+                self.data_manager.add_point(p)
+            messagebox.showinfo("Listo", "Puntos cargados.")
 
     # -----------------------------------------------------
     # INICIAR LOOP

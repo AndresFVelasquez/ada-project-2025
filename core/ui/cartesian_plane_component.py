@@ -9,10 +9,12 @@ class CartesianPlaneComponent:
 
     def update(self, points, figures):
         # Crear panel de selección SOLO la primera vez
+        # Pasamos figures para que calcule los conteos
         if self.selection_panel is None:
             self.selection_panel = SelectionPanel(
                 self.draw_service.fig,
-                self.on_selection_change
+                self.on_selection_change,
+                figures=figures
             )
 
         self.draw_service.ax.clear()
