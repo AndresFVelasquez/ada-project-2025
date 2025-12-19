@@ -34,7 +34,7 @@ class DrawService:
         scale = 1.1 if event.button == 'up' else 0.9
         if event.xdata is None or event.ydata is None:
             return
-        
+
         self.ax.set_xlim(
             event.xdata - (event.xdata - self.ax.get_xlim()[0]) * scale,
             event.xdata + (self.ax.get_xlim()[1] - event.xdata) * scale
@@ -74,7 +74,9 @@ class DrawService:
 
             xs = [p.x for p in fig.vertices] + [fig.vertices[0].x]
             ys = [p.y for p in fig.vertices] + [fig.vertices[0].y]
-            self.ax.plot(xs, ys, linewidth=2)
+            lines = self.ax.plot(xs, ys, linewidth=2.5)
+            color = lines[0].get_color()
+            self.ax.fill(xs, ys, color=color, alpha=0.15)
 
     # --------------------------
     # Full redraw

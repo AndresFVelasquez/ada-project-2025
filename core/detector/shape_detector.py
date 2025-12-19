@@ -57,13 +57,39 @@ class ShapeDetector:
         if len(points) not in (3, 4):
             raise ValueError("normalize_vertices solo acepta 3 o 4 puntos")
 
-        cx = sum(p.x for p in points) / len(points)
-        cy = sum(p.y for p in points) / len(points)
+        n = len(points)
 
-        def angle(p: Point):
-            return math.atan2(p.y - cy, p.x - cx)
+        # 1. Calcular centroide
+        cx = 0
+        cy = 0
+        for p in points:
+            cx += p.x
+            cy += p.y
+        cx /= n
+        cy /= n
 
-        return sorted(points, key=angle, reverse=True)
+        # 2. Calcular ángulos polares
+        angles = []
+        for p in points:
+            ang = math.atan2(p.y - cy, p.x - cx)
+            angles.append(ang)
+
+        # 3. Ordenamiento por inserción (descendente: sentido horario)
+        for i in range(1, n):
+            key_point = points[i]
+            key_angle = angles[i]
+            j = i - 1
+
+            while j >= 0 and angles[j] < key_angle:
+                points[j + 1] = points[j]
+                angles[j + 1] = angles[j]
+                j -= 1
+
+            points[j + 1] = key_point
+            angles[j + 1] = key_angle
+
+        return points
+        
 
     @staticmethod
     def side_length(p1: Point, p2: Point) -> float:
@@ -96,14 +122,6 @@ class ShapeDetector:
     # ----------------------------------------------------
     # TRIÁNGULOS
     # ----------------------------------------------------
-    @staticmethod
-    def triangle_vectors(points: list):
-        p0, p1, p2 = points
-        return [
-            ((p1.x - p0.x), (p1.y - p0.y)),
-            ((p2.x - p1.x), (p2.y - p1.y)),
-            ((p0.x - p2.x), (p0.y - p2.y)),
-        ]
 
     @staticmethod
     def angle_at(points, i):

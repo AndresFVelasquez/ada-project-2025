@@ -5,9 +5,14 @@ from tkinter import ttk, messagebox, simpledialog
 from core.data.data_manager import DataManager
 from core.detector.shape_detector import ShapeDetector
 from core.analysis.shape_sorter import ShapeSorter
+
+from core.analysis.shape_counter import ShapeCounter
+
 from core.ui.draw_service import DrawService
 from core.ui.cartesian_plane_component import CartesianPlaneComponent
 from core.domain.point import Point
+
+from core.domain.figure_type import FigureType
 
 import matplotlib.pyplot as plt
 
@@ -236,11 +241,25 @@ class Menu:
         figures = self.detector.detect_shapes(points)
         self.data_manager.figures = figures
 
-        messagebox.showinfo("OK", f"Figuras detectadas: {len(figures)}")
+        # Asignamos el ID a la figura para que se quede con ella (persista al ordenar)
+        for i, f in enumerate(figures, 1):
+            f.id = i
 
+        # messagebox.showinfo("OK", f"Figuras detectadas: {len(figures)}")
+        counts = ShapeCounter.count_by_type(figures)
+        msg = (
+            f"Cuadrados: {counts.get(FigureType.SQUARE, 0)}\n"
+            f"Rectángulos: {counts.get(FigureType.RECTANGLE, 0)}\n"
+            f"T. Rectángulos: {counts.get(FigureType.RIGHT_TRIANGLE, 0)}\n"
+            f"T. Acutángulos: {counts.get(FigureType.ACUTE_TRIANGLE, 0)}"
+        )
+
+        messagebox.showinfo("Detección", msg)
+        #
     # -----------------------------------------------------
     # ORDENAR FIGURAS
     # -----------------------------------------------------
+
     def sort_figures(self):
         if not self.data_manager.figures:
             messagebox.showwarning("Sin figuras", "Primero detecte figuras.")
@@ -264,7 +283,7 @@ class Menu:
         win.resizable(False, False)
         win.configure(bg=self.COLOR_BG)
         win.protocol("WM_DELETE_WINDOW", win.destroy)
-        self._center_child_window(win, 600, 500)
+        self._center_child_window(win, 750, 500)
 
         container = ttk.Frame(win)
         container.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
@@ -284,10 +303,11 @@ class Menu:
                              bg=self.COLOR_BTN_BG, fg="white", selectbackground=self.COLOR_ACCENT, relief="flat", font=self.FONT_NORMAL)
         listbox.pack(fill=tk.BOTH, expand=True)
 
+
         for f in figs:
             listbox.insert(
                 tk.END,
-                f"{f.name} | Área: {f.area:.2f} | Tipo: {f.type.name}"
+                f"ID {f.id}: {f.name} | Puntos: {f.vertices} | Área: {f.area:.2f}"
             )
 
     # -----------------------------------------------------
