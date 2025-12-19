@@ -6,6 +6,7 @@ class Figure(ABC):
     Abstract base class for geometric figures.
     """
     def __init__(self, name: str, vertices: list, figure_type: FigureType):
+        self.id = 0
         self.name = name
         self.vertices = vertices
         self.type = figure_type
